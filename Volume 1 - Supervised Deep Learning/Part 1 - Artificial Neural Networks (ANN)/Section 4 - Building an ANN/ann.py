@@ -110,23 +110,32 @@ from keras.layers import Dropout
 
 from keras.wrappers.scikit_learn import KerasClassifier
 from sklearn.model_selection import GridSearchCV
-def build_classifier(optimizer, rate):
-    print(optimizer, rate)
+
+
+def build_classifier(optimizer, init):
     classifier = Sequential()
-    classifier.add(Dense(6, input_shape=(11,), activation='relu', kernel_initializer='uniform', bias_initializer='uniform'))
-    classifier.add(Dropout(rate))
-    classifier.add(Dense(6, activation='relu', kernel_initializer='uniform', bias_initializer='uniform'))
-    classifier.add(Dropout(rate))
-    classifier.add(Dense(1, activation='sigmoid', kernel_initializer='uniform', bias_initializer='uniform'))
-    classifier.compile(optimizer=optimizer, loss='binary_crossentropy', metrics=['accuracy'] )
+    classifier.add(Dense(6, input_shape=(11,), activation='relu',
+                         kernel_initializer=init,
+                         bias_initializer=init))
+    classifier.add(Dropout(0.5))
+    classifier.add(Dense(6, activation='relu',
+                         kernel_initializer=init,
+                         bias_initializer=init))
+    classifier.add(Dropout(0.5))
+    classifier.add(Dense(1, activation='sigmoid',
+                         kernel_initializer=init,
+                         bias_initializer=init))
+    classifier.compile(optimizer=optimizer, loss='binary_crossentropy',
+                       metrics=['accuracy'])
     return classifier
 
 
 classifier = KerasClassifier(build_fn=build_classifier)
 parameters = {'batch_size': [25, 32],
               'epochs': [100, 500],
-              'optimizer': ['adam', 'rmsprop'],
-              'rate': [0.1, 0.2, 0.3, 0.4, 0.5]}
+              'optimizer': ['rmsprop', 'adam'],
+              'init': ['uniform', 'glorot_uniform'],
+              }
 grid_search = GridSearchCV(estimator=classifier,
                            param_grid=parameters,
                            scoring='accuracy',
